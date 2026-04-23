@@ -7,31 +7,59 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomePage(),
-    );
+    return MaterialApp(debugShowCheckedModeBanner: false, home: HomePage());
   }
 }
 
-class HomePage extends StatelessWidget {
-  final List<Map<String, dynamic>> transaksi = [
-    {"nama": "Makan", "nominal": 20000, "isPemasukan": false},
-    {"nama": "Gaji", "nominal": 2000000, "isPemasukan": true},
-    {"nama": "Pulsa", "nominal": 50000, "isPemasukan": false},
-  ];
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  List<Map<String, dynamic>> transaksi = [];
+
+  final TextEditingController namaController = TextEditingController();
+  final TextEditingController nominalController = TextEditingController();
+
+  bool isPemasukan = true;
+
+  void tambahTransaksi() {
+    setState(() {
+      transaksi.add({
+        "nama": namaController.text,
+        "nominal": int.tryParse(nominalController.text) ?? 0,
+        "isPemasukan": isPemasukan,
+      });
+    });
+
+    namaController.clear();
+    nominalController.clear();
+  }
+
+  int hitungSaldo() {
+    int total = 0;
+
+    for (var item in transaksi) {
+      int nominal = item["nominal"] as int; // 👈 INI FIX
+
+      if (item["isPemasukan"]) {
+        total += nominal;
+      } else {
+        total -= nominal;
+      }
+    }
+
+    return total;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Money Tracker"),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text("CATATAN KEUANGAN"), centerTitle: true),
 
       body: Column(
         children: [
-
           // 🔹 SALDO
           Container(
             width: double.infinity,
@@ -43,13 +71,10 @@ class HomePage extends StatelessWidget {
             ),
             child: Column(
               children: [
-                Text(
-                  "Total Saldo",
-                  style: TextStyle(color: Colors.white),
-                ),
+                Text("Total Saldo", style: TextStyle(color: Colors.white)),
                 SizedBox(height: 10),
                 Text(
-                  "Rp 1.930.000",
+                  "Rp ${hitungSaldo()}",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 24,
@@ -62,11 +87,80 @@ class HomePage extends StatelessWidget {
 
           // 🔹 TOMBOL TAMBAH
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text("Tambah Transaksi"),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          controller: namaController,
+                          decoration: InputDecoration(labelText: "Nama"),
+                        ),
+
+                        TextField(
+                          controller: nominalController,
+                          decoration: InputDecoration(labelText: "Nominal"),
+                          keyboardType: TextInputType.number,
+                        ),
+
+                        SizedBox(height: 10),
+
+                        Wrap(
+                          spacing: 10,
+                          children: [
+                            ChoiceChip(
+                              label: Text("Pemasukan"),
+                              selected: isPemasukan,
+                              onSelected: (val) {
+                                setState(() {
+                                  isPemasukan = true;
+                                });
+                              },
+                            ),
+                            ChoiceChip(
+                              label: Text("Pengeluaran"),
+                              selected: !isPemasukan,
+                              onSelected: (val) {
+                                setState(() {
+                                  isPemasukan = false;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text("Batal"),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (namaController.text.isEmpty ||
+                              nominalController.text.isEmpty) {
+                            return;
+                          }
+
+                          tambahTransaksi();
+                          Navigator.pop(context);
+                        },
+                        child: Text("Simpan"),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
             child: Text("+ Tambah Transaksi"),
           ),
-
-          SizedBox(height: 10),
 
           // 🔹 LIST TRANSAKSI
           Expanded(
@@ -75,26 +169,39 @@ class HomePage extends StatelessWidget {
               itemBuilder: (context, index) {
                 final item = transaksi[index];
 
-                return Card(
-                  margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  child: ListTile(
-                    leading: Icon(
-                      item["isPemasukan"]
-                          ? Icons.arrow_downward
-                          : Icons.arrow_upward,
-                      color: item["isPemasukan"]
-                          ? Colors.green
-                          : Colors.red,
-                    ),
-                    title: Text(item["nama"]),
-                    trailing: Text(
-                      (item["isPemasukan"] ? "+ " : "- ") +
-                          "Rp ${item["nominal"]}",
-                      style: TextStyle(
-                        color: item["isPemasukan"]
-                            ? Colors.green
-                            : Colors.red,
-                        fontWeight: FontWeight.bold,
+                return Dismissible(
+                  key: UniqueKey(),
+                  onDismissed: (direction) {
+                    setState(() {
+                      transaksi.removeAt(index);
+                    });
+                  },
+                  background: Container(
+                    color: Colors.red,
+                    padding: EdgeInsets.only(left: 20),
+                    alignment: Alignment.centerLeft,
+                    child: Icon(Icons.delete, color: Colors.white),
+                  ),
+
+                  child: Card(
+                    margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    child: ListTile(
+                      leading: Icon(
+                        item["isPemasukan"]
+                            ? Icons.arrow_downward
+                            : Icons.arrow_upward,
+                        color: item["isPemasukan"] ? Colors.green : Colors.red,
+                      ),
+                      title: Text(item["nama"]),
+                      trailing: Text(
+                        (item["isPemasukan"] ? "+ " : "- ") +
+                            "Rp ${item["nominal"]}",
+                        style: TextStyle(
+                          color: item["isPemasukan"]
+                              ? Colors.green
+                              : Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
