@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 void main() {
   runApp(MyApp());
@@ -23,6 +25,29 @@ class _HomePageState extends State<HomePage> {
   final TextEditingController nominalController = TextEditingController();
 
   bool isPemasukan = true;
+  @override
+  void initState() {
+    super.initState();
+    loadData(); // 👈 WAJIB DI SINI
+  }
+
+  Future<void> simpanData() async {
+    final prefs = await SharedPreferences.getInstance();
+    String data = jsonEncode(transaksi);
+    await prefs.setString('dataTransaksi', data);
+  }
+
+  // 👇 TAMBAHKAN DI SINI
+  Future<void> loadData() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? data = prefs.getString('dataTransaksi');
+
+    if (data != null) {
+      setState(() {
+        transaksi = List<Map<String, dynamic>>.from(jsonDecode(data));
+      });
+    }
+  }
 
   void tambahTransaksi() {
     setState(() {
@@ -32,6 +57,7 @@ class _HomePageState extends State<HomePage> {
         "isPemasukan": isPemasukan,
       });
     });
+    simpanData();
 
     namaController.clear();
     nominalController.clear();
@@ -175,6 +201,7 @@ class _HomePageState extends State<HomePage> {
                     setState(() {
                       transaksi.removeAt(index);
                     });
+                    simpanData();
                   },
                   background: Container(
                     color: Colors.red,
