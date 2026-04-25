@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 import 'dart:convert';
 
 void main() {
@@ -28,7 +29,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    loadData(); 
+    loadData();
   }
 
   Future<void> simpanData() async {
@@ -82,28 +83,48 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("CATATAN KEUANGAN"), centerTitle: true),
+      backgroundColor: Color(0xFFF5F6FA),
+      appBar: AppBar(
+        title: Text(
+          "Catatan Keuangan",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.black,
+      ),
 
       body: Column(
         children: [
           // 🔹 SALDO
           Container(
             width: double.infinity,
+            margin: EdgeInsets.all(16),
             padding: EdgeInsets.all(20),
-            margin: EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.blue,
-              borderRadius: BorderRadius.circular(15),
+              gradient: LinearGradient(
+                colors: [Color(0xFF4facfe), Color(0xFF00f2fe)],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.blue.withOpacity(0.3),
+                  blurRadius: 10,
+                  offset: Offset(0, 5),
+                ),
+              ],
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Total Saldo", style: TextStyle(color: Colors.white)),
+                Text("Total Saldo", style: TextStyle(color: Colors.white70)),
                 SizedBox(height: 10),
                 Text(
-                  "Rp ${hitungSaldo()}",
+                  "Rp ${NumberFormat('#,###', 'id_ID').format(hitungSaldo())}",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 24,
+                    fontSize: 28,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -222,7 +243,7 @@ class _HomePageState extends State<HomePage> {
                       title: Text(item["nama"]),
                       trailing: Text(
                         (item["isPemasukan"] ? "+ " : "- ") +
-                            "Rp ${item["nominal"]}",
+                            "Rp ${NumberFormat('#,###', 'id_ID').format(item["nominal"])}",
                         style: TextStyle(
                           color: item["isPemasukan"]
                               ? Colors.green
