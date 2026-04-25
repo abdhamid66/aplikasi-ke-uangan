@@ -8,6 +8,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(debugShowCheckedModeBanner: false, home: HomePage());
@@ -15,8 +17,10 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
@@ -226,8 +230,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     title: Text(item["nama"]),
                     trailing: Text(
-                      (item["isPemasukan"] ? "+ " : "- ") +
-                          "Rp ${NumberFormat('#,###', 'id_ID').format(item["nominal"])}",
+                      "${item["isPemasukan"] ? "+ " : "- "}Rp ${NumberFormat('#,###', 'id_ID').format(item["nominal"])}",
                     ),
                   ),
                 );
