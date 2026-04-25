@@ -67,7 +67,7 @@ class _HomePageState extends State<HomePage> {
     int total = 0;
 
     for (var item in transaksi) {
-      int nominal = item["nominal"] as int; // 👈 INI FIX
+      int nominal = item["nominal"] as int;
 
       if (item["isPemasukan"]) {
         total += nominal;
