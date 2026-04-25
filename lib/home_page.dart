@@ -2,6 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:apk_catatan_keuangan/custom_widget/dialog_nambah.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -131,65 +132,10 @@ class _HomePageState extends State<HomePage> {
                   showDialog(
                     context: context,
                     builder: (context) {
-                      return AlertDialog(
-                        title: Text("Tambah Transaksi"),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextField(
-                              controller: namaController,
-                              decoration: InputDecoration(labelText: "Nama"),
-                            ),
-                            TextField(
-                              controller: nominalController,
-                              decoration: InputDecoration(labelText: "Nominal"),
-                              keyboardType: TextInputType.number,
-                            ),
-                            SizedBox(height: 10),
-                            Wrap(
-                              spacing: 10,
-                              children: [
-                                ChoiceChip(
-                                  label: Text("Pemasukan"),
-                                  selected: isPemasukan,
-                                  onSelected: (val) {
-                                    setState(() {
-                                      isPemasukan = true;
-                                    });
-                                  },
-                                ),
-                                ChoiceChip(
-                                  label: Text("Pengeluaran"),
-                                  selected: !isPemasukan,
-                                  onSelected: (val) {
-                                    setState(() {
-                                      isPemasukan = false;
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: Text("Batal"),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              if (namaController.text.isEmpty ||
-                                  nominalController.text.isEmpty) {
-                                return;
-                              }
-                              tambahTransaksi();
-                              Navigator.pop(context);
-                            },
-                            child: Text("Simpan"),
-                          ),
-                        ],
+                      return DialogTambah(
+                        tambahTransaksi: tambahTransaksi,
+                        namaController: namaController,
+                        nominalController: nominalController,
                       );
                     },
                   );
