@@ -38,7 +38,6 @@ class _HomePageState extends State<HomePage> {
     await prefs.setString('dataTransaksi', data);
   }
 
-  // 👇 TAMBAHKAN DI SINI
   Future<void> loadData() async {
     final prefs = await SharedPreferences.getInstance();
     String? data = prefs.getString('dataTransaksi');
@@ -87,14 +86,13 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text(
           "Catatan Keuangan",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
         ),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.black,
       ),
-
       body: Column(
         children: [
           // 🔹 SALDO
@@ -107,13 +105,6 @@ class _HomePageState extends State<HomePage> {
                 colors: [Color(0xFF4facfe), Color(0xFF00f2fe)],
               ),
               borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.blue.withOpacity(0.3),
-                  blurRadius: 10,
-                  offset: Offset(0, 5),
-                ),
-              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,125 +123,111 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // 🔹 TOMBOL TAMBAH
-          ElevatedButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: Text("Tambah Transaksi"),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextField(
-                          controller: namaController,
-                          decoration: InputDecoration(labelText: "Nama"),
-                        ),
-
-                        TextField(
-                          controller: nominalController,
-                          decoration: InputDecoration(labelText: "Nominal"),
-                          keyboardType: TextInputType.number,
-                        ),
-
-                        SizedBox(height: 10),
-
-                        Wrap(
-                          spacing: 10,
+          //
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  backgroundColor: Colors.blue,
+                ),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text("Tambah Transaksi"),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            ChoiceChip(
-                              label: Text("Pemasukan"),
-                              selected: isPemasukan,
-                              onSelected: (val) {
-                                setState(() {
-                                  isPemasukan = true;
-                                });
-                              },
+                            TextField(
+                              controller: namaController,
+                              decoration: InputDecoration(labelText: "Nama"),
                             ),
-                            ChoiceChip(
-                              label: Text("Pengeluaran"),
-                              selected: !isPemasukan,
-                              onSelected: (val) {
-                                setState(() {
-                                  isPemasukan = false;
-                                });
-                              },
+                            TextField(
+                              controller: nominalController,
+                              decoration: InputDecoration(labelText: "Nominal"),
+                              keyboardType: TextInputType.number,
+                            ),
+                            SizedBox(height: 10),
+                            Wrap(
+                              spacing: 10,
+                              children: [
+                                ChoiceChip(
+                                  label: Text("Pemasukan"),
+                                  selected: isPemasukan,
+                                  onSelected: (val) {
+                                    setState(() {
+                                      isPemasukan = true;
+                                    });
+                                  },
+                                ),
+                                ChoiceChip(
+                                  label: Text("Pengeluaran"),
+                                  selected: !isPemasukan,
+                                  onSelected: (val) {
+                                    setState(() {
+                                      isPemasukan = false;
+                                    });
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
-
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text("Batal"),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          if (namaController.text.isEmpty ||
-                              nominalController.text.isEmpty) {
-                            return;
-                          }
-
-                          tambahTransaksi();
-                          Navigator.pop(context);
-                        },
-                        child: Text("Simpan"),
-                      ),
-                    ],
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text("Batal"),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              if (namaController.text.isEmpty ||
+                                  nominalController.text.isEmpty) {
+                                return;
+                              }
+                              tambahTransaksi();
+                              Navigator.pop(context);
+                            },
+                            child: Text("Simpan"),
+                          ),
+                        ],
+                      );
+                    },
                   );
                 },
-              );
-            },
-            child: Text("+ Tambah Transaksi"),
+                child: Text("+ Tambah Transaksi"),
+              ),
+            ),
           ),
 
-          // 🔹 LIST TRANSAKSI
+          // 🔹 LIST
           Expanded(
             child: ListView.builder(
               itemCount: transaksi.length,
               itemBuilder: (context, index) {
                 final item = transaksi[index];
 
-                return Dismissible(
-                  key: UniqueKey(),
-                  onDismissed: (direction) {
-                    setState(() {
-                      transaksi.removeAt(index);
-                    });
-                    simpanData();
-                  },
-                  background: Container(
-                    color: Colors.red,
-                    padding: EdgeInsets.only(left: 20),
-                    alignment: Alignment.centerLeft,
-                    child: Icon(Icons.delete, color: Colors.white),
-                  ),
-
-                  child: Card(
-                    margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    child: ListTile(
-                      leading: Icon(
-                        item["isPemasukan"]
-                            ? Icons.arrow_downward
-                            : Icons.arrow_upward,
-                        color: item["isPemasukan"] ? Colors.green : Colors.red,
-                      ),
-                      title: Text(item["nama"]),
-                      trailing: Text(
-                        (item["isPemasukan"] ? "+ " : "- ") +
-                            "Rp ${NumberFormat('#,###', 'id_ID').format(item["nominal"])}",
-                        style: TextStyle(
-                          color: item["isPemasukan"]
-                              ? Colors.green
-                              : Colors.red,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                return Card(
+                  margin: EdgeInsets.all(10),
+                  child: ListTile(
+                    leading: Icon(
+                      item["isPemasukan"]
+                          ? Icons.arrow_downward
+                          : Icons.arrow_upward,
+                      color: item["isPemasukan"] ? Colors.green : Colors.red,
+                    ),
+                    title: Text(item["nama"]),
+                    trailing: Text(
+                      (item["isPemasukan"] ? "+ " : "- ") +
+                          "Rp ${NumberFormat('#,###', 'id_ID').format(item["nominal"])}",
                     ),
                   ),
                 );
