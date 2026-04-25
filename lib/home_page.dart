@@ -2,7 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:apk_catatan_keuangan/custom_widget/dialog_nambah.dart';
+import 'package:apk_catatan_keuangan/custom_widget/dialog_tambah.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void tambahTransaksi() {
+  void tambahTransaksi(bool isPemasukan) {
     setState(() {
       transaksi.add({
         "nama": namaController.text,

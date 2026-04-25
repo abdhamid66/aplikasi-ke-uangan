@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class DialogTambah extends StatefulWidget {
-  final Function tambahTransaksi;
+  final Function(bool) tambahTransaksi;
   final TextEditingController namaController;
   final TextEditingController nominalController;
 
